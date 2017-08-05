@@ -15,7 +15,13 @@
 package com.google.codeu.mathlang.impl;
 
 import java.io.IOException;
+import java.util.Queue;
+import java.util.LinkedList;
+import java.util.ArrayList;
 
+import com.google.codeu.mathlang.core.tokens.NumberToken;
+import com.google.codeu.mathlang.core.tokens.SymbolToken;
+import com.google.codeu.mathlang.core.tokens.NameToken;
 import com.google.codeu.mathlang.core.tokens.Token;
 import com.google.codeu.mathlang.parsing.TokenReader;
 
@@ -27,9 +33,16 @@ import com.google.codeu.mathlang.parsing.TokenReader;
 // work with the test of the system.
 public final class MyTokenReader implements TokenReader {
 
+  private String source;
+  private ArrayList<Character> chars;
+  private Queue<Token> tokens;
+
   public MyTokenReader(String source) {
     // Your token reader will only be given a string for input. The string will
     // contain the whole source (0 or more lines).
+    this.source = source;
+    this.chars = new ArrayList<Character>();
+    this.tokens = new LinkedList<>();
   }
 
   @Override
@@ -40,7 +53,38 @@ public final class MyTokenReader implements TokenReader {
 
     // If for any reason you detect an error in the input, you may throw an IOException
     // which will stop all execution.
-
-    return null;
+    for (char c : source.toCharArray()) {
+      chars.add(c);
+    }
+    String nameToken = "";
+    String numberToken = "";
+    String symbolToken = "";
+    String stringToken = "";
+    for(int x = 0; x < chars.size()-1; x++) {
+      if(Character.isLetter(chars.get(x))) {
+        nameToken = nameToken + chars.get(x);
+      } else if (!(nameToken.equals(""))) {
+        NameToken nameToke = new NameToken(nameToken);
+        tokens.add(nameToke);
+        nameToken = "";
+      }
+      if (Character.isDigit(chars.get(x))) {
+        numberToken = numberToken + chars.get(x);
+      } else if (!(numberToken.equals(""))) {
+        double value = Double.parseDouble(numberToken);
+        NumberToken numToke = new NumberToken(value);
+        tokens.add(numToke);
+        numberToken = "";
+      }
+      if (Character.isLetterOrDigit(chars.get(x)) == false){
+        symbolToken = symbolToken + chars.get(x);
+      } else if (!(symbolToken.equals(""))) {
+        char c = symbolToken.charAt(0);
+        SymbolToken symToke = new SymbolToken(c);
+        tokens.add(symToke);
+        symbolToken = "";
+      }
+    }
+    return tokens.peek();
   }
 }
